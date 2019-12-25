@@ -1,0 +1,5 @@
+---
+database_name: 'wordpress_db'
+database_user: 'china'
+database_password: '123456'
+wordpress_dir: '/var/www/wordpress'

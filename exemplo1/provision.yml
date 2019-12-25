@@ -1,0 +1,104 @@
+---
+- hosts: mysql
+  handlers:
+    - name: restart_mysql
+      service: 
+        name: mysql
+        state: restarted
+      become: yes
+  tasks:
+    # - shell: 'echo hello > /vagrant/ansible/hello.txt'
+    - name: 'packages'
+      apt:
+        name: [ 
+          'mysql-server', 
+          'python-mysqldb' # package necessario para o ansible
+        ]
+        state: latest
+      become: yes # become root
+
+    - name: 'Cria o banco do MySQL'
+      mysql_db: 
+        name: "{{database_name}}"
+        login_user: root
+        state: present
+      become: yes
+
+    - name: 'Cria o usuário do MySQL'
+      mysql_user:
+        login_user: root
+        login_password: ''
+        name: "{{database_user}}"
+        password: "{{database_password}}"
+        priv: '*.*:ALL,GRANT'
+        state: present
+        host: '{{item}}'
+      with_items:
+        - 'localhost'
+        - '127.0.0.1'
+        - "{{host_ip}}"
+      become: yes
+
+    - name: 'MySQL conf'
+      copy:
+        src: 'mysqld.cnf'
+        dest: '/etc/mysql/mysql.conf.d/'
+      become: yes
+      notify: restart_mysql
+
+- hosts: wordpress
+  handlers:
+    - name: restart_apache
+      service: 
+        name: apache2
+        state: restarted
+      become: yes
+  tasks:
+    # - shell: 'echo hello > /vagrant/ansible/hello.txt'
+    - name: 'packages'
+      apt:
+        name: [ 
+          'php', 
+          'apache2', 
+          'php-gd', 
+          'php-mysql'
+        ]
+        state: latest
+      become: yes # become root
+
+    - name: 'Download wordpress'
+      get_url: 
+        url: 'https://br.wordpress.org/latest-pt_BR.tar.gz'
+        dest: '/tmp/latest-pt_BR.tar.gz'
+
+    - name: 'Descompactando o wordpress'
+      unarchive: 
+        src: '/tmp/latest-pt_BR.tar.gz'
+        dest: '/var/www/'
+        remote_src: yes
+      become: yes
+
+    - copy:
+        src: "{{wordpress_dir}}/wp-config-sample.php"
+        dest: "{{wordpress_dir}}/wp-config.php"
+        remote_src: yes
+      become: yes
+
+    - name: 'wp-config'
+      replace:
+        path: "{{wordpress_dir}}/wp-config.php"
+        regexp: '{{item.regex}}'
+        replace: '{{item.value}}'
+      with_items:
+        - { regex: 'nome_do_banco_de_dados_aqui', value: "{{database_name}}"  }
+        - { regex: 'nome_de_usuario_aqui', value: "{{database_user}}"  }
+        - { regex: 'senha_aqui', value: "{{database_password}}"  }
+        - { regex: 'localhost', value: "{{database_ip}}"  }
+      become: yes
+
+    - name: 'Apache conf'
+      template:
+        src: 'templates/000-default.conf'
+        dest: '/etc/apache2/sites-available/000-default.conf'
+      become: yes
+      notify: restart_apache

@@ -1,0 +1,11 @@
+---
+- name: 'packages'
+  apt:
+    name: [ 
+      'php', 
+      'apache2', 
+      'php-gd', 
+      'php-mysql'
+    ]
+    state: latest
+  become: yes # become root

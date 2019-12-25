@@ -1,0 +1,36 @@
+---
+- name: 'packages'
+  apt:
+    name: [ 
+      'mysql-server', 
+      'python-mysqldb' # package necessario para o ansible
+    ]
+    state: latest
+  become: yes # become root
+
+- name: 'Cria o banco do MySQL'
+  mysql_db: 
+    name: "{{database_name}}"
+    login_user: root
+    state: present
+  become: yes
+
+- name: 'Cria o usuário do MySQL'
+  mysql_user:
+    login_user: root
+    login_password: ''
+    name: "{{database_user}}"
+    password: "{{database_password}}"
+    priv: '*.*:ALL,GRANT'
+    state: present
+    host: '{{item}}'
+  with_items:
+    - "{{host_ip}}"
+  become: yes
+
+- name: 'MySQL conf'
+  copy:
+    src: 'files/mysqld.cnf'
+    dest: '/etc/mysql/mysql.conf.d/'
+  become: yes
+  notify: restart_mysql
