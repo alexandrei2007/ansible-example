@@ -25,3 +25,12 @@ Exemplo de provisionamento de wordpress utilizando Ansible. As tasks e handlers 
 vagrant ssh ansible
 sudo ansible-playbook /vagrant/exemplo2/provision.yml -i /vagrant/exemplo2/hosts
 ```
+
+## Exemplo 3
+
+Exemplo utilizando como target uma máquina Windows
+
+```bash
+vagrant ssh ansible
+sudo ansible-playbook /vagrant/exemplo3/provision.yml -i /vagrant/exemplo3/hosts
+```

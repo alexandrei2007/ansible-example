@@ -1,0 +1,12 @@
+---
+- hosts: all
+  tasks:
+    - name: Create user test
+      win_user:
+        name: test
+        password: 123456
+        state: present
+        groups:
+          - Users
+    - name: Create temp folder
+      win_shell: 'New-Item -ItemType Directory -Force -Path C:\tmp\'
