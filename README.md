@@ -34,3 +34,19 @@ Exemplo utilizando como target uma máquina Windows
 vagrant ssh ansible
 sudo ansible-playbook /vagrant/exemplo3/provision.yml -i /vagrant/exemplo3/hosts
 ```
+
+## Exemplo 4
+
+Utilizando variáveis por ambiente (dev)
+
+```bash
+vagrant ssh ansible
+sudo ansible-playbook /vagrant/exemplo4/provision.yml -i /vagrant/exemplo4/hosts
+```
+
+Utilizando variáveis criptografadas (prod). Vault pass: `senha`
+
+```bash
+vagrant ssh ansible
+sudo ansible-playbook /vagrant/exemplo4/provision.yml -i /vagrant/exemplo4/hosts --ask-vault-pass --extra-vars 'stage=prod'
+```

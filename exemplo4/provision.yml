@@ -1,0 +1,16 @@
+---
+- hosts: all
+  vars:
+    stage: dev
+
+  tasks:
+    - name: Include vars of variables.{{stage}}.yml
+      include_vars:
+        file: "variables.{{stage}}.yml"
+
+    - name: 'Testing vars'
+      shell: "echo [{{stage}}] / {{var1}} / {{var2}}"
+      become: yes
+      register: test
+
+    - debug: msg="{{ test.stdout }}"
